@@ -1,0 +1,51 @@
+﻿using System;
+using System.Linq;
+using WordReference;
+
+namespace SampleApp
+{
+	public static class Program
+	{
+		public static void Main(string[] args)
+		{
+			// The context just requires an API key, see http://www.wordreference.com/docs/api.aspx for terms etc
+			var context = new WordReferenceContext("51dfe");
+
+			// A dictionary uses a source and target language to query the WordReference API
+			var enfrDict = context.CreateDictionary(Language.English, Language.French);
+
+			while(true)
+			{
+				Console.WriteLine("Please enter a search query");
+				var query = Console.ReadLine();
+				Console.WriteLine();
+
+				// In this simple console app, we just wait for the task to complete
+				// However, it's fully async using the TPL should you need it
+				var task = enfrDict.TranslateAsync(query);
+				task.Wait();
+
+				Console.WriteLine("Found {0} results:", task.Result.Count());
+
+				var i = 0;
+
+				// The response from the TranslateAsync call is an IEnumerable<TranslationSet>
+				// Each TranslationSet contains an original phrase, which indicates the sense
+				// This is followed by a list of possible translations in that context
+				foreach(var set in task.Result)
+				{
+					Console.WriteLine("Result #{0}: original sense is \"{1}\" ({2})", ++i, set.Original.Sense, set.Original.PartOfSpeech);
+					Console.WriteLine();
+
+					foreach(var translation in set.Translations)
+						Console.WriteLine(string.Format("\t{0}", translation.Term));
+
+					Console.WriteLine();
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+	}
+}
