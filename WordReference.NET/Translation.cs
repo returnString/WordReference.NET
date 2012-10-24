@@ -5,13 +5,18 @@ namespace WordReference
 {
 	public class TranslationResponse
 	{
+		public string Query { get; internal set; }
 		public IEnumerable<TranslationSet> Translations { get; internal set; }
+
+		internal TranslationResponse() { }
 	}
 
 	public class TranslationSet
 	{
 		public Phrase Original { get; internal set; }
 		public IEnumerable<Phrase> Translations { get; internal set; }
+
+		internal TranslationSet() { }
 	}
 	
 	public class Phrase
@@ -24,5 +29,7 @@ namespace WordReference
 		public string Sense { get; internal set; }
 		[JsonProperty("usage")]
 		public string Usage { get; internal set; }
+
+		internal Phrase() { }
 	}
 }

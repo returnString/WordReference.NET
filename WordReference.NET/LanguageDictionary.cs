@@ -29,10 +29,16 @@ namespace WordReference
 
 		private static readonly string[] Categories = { "Entries", "PrincipalTranslations", "AdditionalTranslations" };
 
-		public async Task<IEnumerable<TranslationSet>> TranslateAsync(string word)
+		public async Task<TranslationResponse> TranslateAsync(string word)
 		{
 			var raw = await m_client.DownloadStringTaskAsync(GetUri(word));
 			var obj = JObject.Parse(raw);
+
+			var error = obj["Error"];
+			if(error != null && error.Value<string>() == "UnsupportedDictionary")
+				throw new NotSupportedException(string.Format("The specified dictionary, {0}, is not available via the WordReference API.", m_lookup));
+
+			var response = new TranslationResponse { Query = word };
 			var list = new List<TranslationSet>();
 
 			foreach(var pair in obj)
@@ -42,7 +48,7 @@ namespace WordReference
 				// TODO: Add support for compounds etc
 				if(!key.Contains("term"))
 					continue;
-				
+
 				foreach(var cat in pair.Value)
 				{
 					var catProp = cat as JProperty;
@@ -81,7 +87,8 @@ namespace WordReference
 				}
 			}
 
-			return list;
+			response.Translations = list;
+			return response;
 		}
 
 		private Phrase ParseWord(JProperty prop)
