@@ -12,7 +12,7 @@ namespace SampleApp
 			var context = new WordReferenceContext("51dfe");
 
 			// A dictionary uses a source and target language to query the WordReference API
-			var enfrDict = context.CreateDictionary(Language.English, Language.German);
+			var enfrDict = context.CreateDictionary(Language.English, Language.French);
 
 			while(true)
 			{
